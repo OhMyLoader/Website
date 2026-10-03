@@ -72,6 +72,30 @@ registry.declareItem("ruby_sword") {
 
 ## 配方与掉落
 
+### 合成
+
+```kotlin
+// 有序合成：4 个 ruby 合成 1 个 ruby_block（pattern 行引用 key 映射，' ' 为空格）
+registry.declareShapedCrafting(
+    result = "my_mod:ruby_block",
+    pattern = listOf("RR", "RR"),
+    key = mapOf('R' to "my_mod:ruby"),
+)
+
+// 无序合成：材料任意摆放
+registry.declareShapelessCrafting(
+    result = "my_mod:ruby",
+    ingredients = listOf("my_mod:ruby_ore", "minecraft:stick"),
+    count = 2,
+)
+```
+
+pattern 规则：1-3 行、每行 1-3 格、各行等宽、每个非空格字符必须有 key 条目——格式错误在声明时
+直接抛出，早于内容包加载。裸材料 id 自动补上 mod 命名空间。数据包文件 id 由 result 派生
+（`my_mod:ruby_block` → `my_mod_ruby_block`）；两个配方产出相同时，第二个加数字后缀。
+
+### 熔炼
+
 ```kotlin
 // 熔炼（furnace 可选 SMELTING / BLASTING / SMOKING，默认 SMELTING）
 registry.declareSmelting(
@@ -102,8 +126,46 @@ requires_correct_tool = true
 max_damage = 64
 attack_damage = 2.0
 mines_and_drops = "minecraft:stone"
+
+[crafting.ruby_block]
+type = "shaped"
+pattern = ["RR", "RR"]
+key = { R = "ruby" }
+
+[crafting.ruby_from_ore]
+type = "shapeless"
+count = 2
+ingredients = ["ruby_ore", "minecraft:stick"]
 ```
 
-字段与代码 API 一一对应（`destroy_time` → `destroyTime` …）。TOML 包与代码 mod 共享同一条
+字段与代码 API 一一对应（`destroy_time` → `destroyTime` …）。`[crafting.<产出物 id>]` 段声明一个合成配方：`type` 选择
+shaped / shapeless；shaped 需要 `pattern`（行）与 `key` 内联表（图案字符 → 物品 id）；shapeless 需要
+`ingredients` 列表；`count` 可选（默认 1）。格式错误（图案不齐、未知类型、缺字段）会让内容包加载失败
+并说明原因。TOML 包与代码 mod 共享同一条
 收集 → 冻结材料化管线，资产注入也把 TOML 包的命名空间当作 mod 域对待。字段拼错会在启动日志里
 被逐条点名——不存在静默忽略。
+## 分发形态：`.oml` 归档
+
+内容包以 **`.oml` 归档**分发（普通 zip 改名）：根目录放 `content.toml`，随包携带自己的 `assets/`
+与 `data/`：
+
+```
+MyPack.oml (zip)
+├── content.toml
+└── assets/
+    └── my_pack/
+        ├── textures/block/ruby_ore.png
+        └── lang/en_us.json
+```
+
+丢进 `mods/`。归档名即命名空间；归档内的贴图与 lang 经 OML 注入的资源包对外服务。
+
+## 热重载
+
+内容轨的配方跟随 vanilla 的数据包重载：
+
+- **贴图 / lang / 模型**：`F3+T` 会重新扫描 mod jar 与 `.oml` 归档，改动的文件当场生效。
+- **合成配方**：修改包内的配方后执行 `/reload`（或 `F3+T`），loader 从磁盘重新读取内容包，
+  数据包 JSON 以最新内容应答。
+- **方块 / 物品本体**：不可热重载。注册表在启动早期冻结，新增或修改方块 / 物品需要重启——
+  这是 vanilla 的约束，不是 OML 的限制。

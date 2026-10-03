@@ -78,6 +78,31 @@ onto the native `DataComponents.TOOL`.
 
 ## Recipes and drops
 
+### Crafting
+
+```kotlin
+// shaped: 2x2 ruby from 4 ruby items (pattern rows reference the key map, ' ' = empty cell)
+registry.declareShapedCrafting(
+    result = "my_mod:ruby_block",
+    pattern = listOf("RR", "RR"),
+    key = mapOf('R' to "my_mod:ruby"),
+)
+
+// shapeless: any arrangement of the ingredients
+registry.declareShapelessCrafting(
+    result = "my_mod:ruby",
+    ingredients = listOf("my_mod:ruby_ore", "minecraft:stick"),
+    count = 2,
+)
+```
+
+Pattern rules: 1-3 rows of 1-3 cells, all rows the same width, every non-blank character must have
+a key entry — a malformed pattern throws at declaration time, before the pack ever loads. Bare
+ingredient ids are qualified with the mod's namespace. The datapack file id derives from the result
+(`my_mod:ruby_block` → `my_mod_ruby_block`); two recipes with the same result get a numeric suffix.
+
+### Smelting
+
 ```kotlin
 // smelting (furnace: SMELTING / BLASTING / SMOKING, default SMELTING)
 registry.declareSmelting(
@@ -109,9 +134,51 @@ requires_correct_tool = true
 max_damage = 64
 attack_damage = 2.0
 mines_and_drops = "minecraft:stone"
+
+[crafting.ruby_block]
+type = "shaped"
+pattern = ["RR", "RR"]
+key = { R = "ruby" }
+
+[crafting.ruby_from_ore]
+type = "shapeless"
+count = 2
+ingredients = ["ruby_ore", "minecraft:stick"]
 ```
 
-The fields map one-to-one onto the code API (`destroy_time` → `destroyTime`, …). TOML packs share
+The fields map one-to-one onto the code API (`destroy_time` → `destroyTime`, …). A
+`[crafting.<result-id>]` section declares a crafting recipe whose result is that item: `type`
+selects shaped / shapeless; shaped needs `pattern` (rows) plus a `key` inline table mapping
+pattern characters to item ids; shapeless needs an `ingredients` list; `count` is optional
+(default 1). Validation errors (ragged patterns, unknown types, missing fields) fail the pack
+with the reason. TOML packs share
 the same collect → freeze-materialize pipeline as code mods, and asset injection treats the pack's
 namespace like a mod domain. A misspelled field is called out by name in the startup log — nothing
 is silently ignored.
+## Distribution form: `.oml` archives
+
+A content pack ships as a **`.oml` archive** (a plain zip renamed): `content.toml` at the root,
+plus the pack's own `assets/` and `data/`:
+
+```
+MyPack.oml (zip)
+├── content.toml
+└── assets/
+    └── my_pack/
+        ├── textures/block/ruby_ore.png
+        └── lang/en_us.json
+```
+
+Drop it into `mods/`. The archive name is the namespace; the archive's textures and lang files are
+served through OML's injected resource pack.
+
+## Hot reload
+
+Recipes declared through the content tracks ride vanilla's datapack reload:
+
+- **Textures / lang / models**: `F3+T` re-scans the mod jars and `.oml` archives — edited files are
+  picked up on the spot.
+- **Crafting recipes**: edit the recipe in the pack, then run `/reload` (or `F3+T`) — the loader
+  re-reads the packs from disk and the datapack JSON is served fresh.
+- **Blocks / items themselves**: not reloadable. The registries freeze early in startup; adding or
+  changing a block or item requires a restart. This is a vanilla constraint, not an OML limitation.
