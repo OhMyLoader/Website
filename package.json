@@ -1,0 +1,27 @@
+{
+  "name": "ohmyloader.github.io",
+  "version": "1.0.0",
+  "description": "OhMyLoader's official website.",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "dev": "vitepress dev",
+    "build": "vitepress build",
+    "preview": "vitepress preview"
+  },
+  "keywords": [],
+  "author": "FuBangkun",
+  "license": "AGPL-3.0",
+  "devEngines": {
+    "packageManager": {
+      "name": "pnpm",
+      "version": "12.8.1",
+      "onFail": "download"
+    }
+  },
+  "packageManager": "pnpm@12.8.1",
+  "type": "module",
+  "devDependencies": {
+    "vitepress": "2.0.0-alpha.20"
+  }
+}
