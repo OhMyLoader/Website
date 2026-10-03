@@ -25,7 +25,7 @@ features:
     details: Program against high-level game semantics — functional event registration, lifecycle entry points, a content declaration DSL. Never touch version internals; native objects stay reachable through the platform escape hatch.
   - icon: 📝
     title: Declarative content
-    details: Declare blocks, items and recipes with a few lines of Kotlin or a single TOML file. They are materialized into native content at the registry freeze point and flow through vanilla's own validation and datapack paths.
+    details: Declare blocks, items and recipes with a few lines of Kotlin or a TOML content pack (an `.oml` archive). They are materialized into native content at the registry freeze point and flow through vanilla's own validation and datapack paths.
   - icon: 🖥️
     title: Both sides
     details: The client and the dedicated server have separate hooks and init paths, selected with a single oml.side flag. One mod source base runs on both, unchanged.

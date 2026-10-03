@@ -3,33 +3,59 @@
 ## 前置
 
 - Zulu JDK 27；
-- 本地开发暂时需要先把 loader 仓库发布到本地 Maven 仓库：
+- 本地开发暂时需要把两个仓库都发布到本地 Maven 仓库：loader 提供运行时坐标，Gradle 插件提供
+  `org.ohmyloader.gradle`。两者是独立工程，各自发布一次：
 
 ```bash
 git clone https://github.com/OhMyLoader/OhMyLoader.git
-cd OhMyLoader
-./gradlew publishToMavenLocal
+git clone https://github.com/OhMyLoader/OhMyLoaderGradle.git
+(cd OhMyLoader && ./gradlew publishToMavenLocal)
+(cd OhMyLoaderGradle && ./gradlew publishToMavenLocal)
 ```
 
+之后只改动了插件时，重新发布插件即可。
+
 ## 建立工程
+
+`settings.gradle.kts` —— 插件必须在工程存在**之前**就能从 `mavenLocal` 解析，而工程级的
+`repositories { }` 管不到插件解析：
+
+```kotlin
+pluginManagement {
+    repositories {
+        mavenLocal()
+        gradlePluginPortal()
+    }
+}
+
+dependencyResolutionManagement {
+    repositories {
+        mavenLocal()
+        mavenCentral()
+    }
+}
+
+rootProject.name = "my-mod"
+```
 
 `build.gradle.kts`：
 
 ```kotlin
 plugins {
-    kotlin("jvm") version "2.5.0"
+    kotlin("jvm") version "2.5.0-Beta1"
     id("org.ohmyloader.gradle") version "0.1.0-SNAPSHOT"
 }
 
-repositories {
-    mavenLocal()
-    mavenCentral()
+kotlin {
+    jvmToolchain(27)
 }
 
 oml {
     minecraftVersion.set("26.3")
 }
 ```
+
+Kotlin 版本必须能产出 Java 27 字节码，`2.5.0-Beta1` 正是 loader 自用的版本。
 
 `oml-gradle` 插件会自动完成其余一切：把 `oml-api` 放上 `compileOnly`、按版本解析运行层（含 per-version
 adapter）、提供 `runClient` / `runServer`、下载并校验游戏 jar / 运行库 / natives / 资产。
@@ -49,7 +75,7 @@ class MyMod : OMLModInitializer {
 
         Events.CHAT_RECEIVED.register { event ->
             if (event.message == "hello") {
-                event.canceled = true
+                event.cancel()
             }
         }
     }

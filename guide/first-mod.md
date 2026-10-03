@@ -3,33 +3,61 @@
 ## Prerequisites
 
 - Zulu JDK 27;
-- For now, local development requires publishing the loader repository to your local Maven repository first:
+- For now, local development requires publishing both repositories to your local Maven repository:
+  the loader provides the runtime coordinates, the Gradle plugin provides `org.ohmyloader.gradle`.
+  They are independent projects, so publish each one:
 
 ```bash
 git clone https://github.com/OhMyLoader/OhMyLoader.git
-cd OhMyLoader
-./gradlew publishToMavenLocal
+git clone https://github.com/OhMyLoader/OhMyLoaderGradle.git
+(cd OhMyLoader && ./gradlew publishToMavenLocal)
+(cd OhMyLoaderGradle && ./gradlew publishToMavenLocal)
 ```
 
+When only the plugin changed, republishing the plugin is enough.
+
 ## Set up the project
+
+`settings.gradle.kts` — the plugin has to be resolvable from `mavenLocal` *before* the project
+exists, and project-level `repositories { }` does not cover plugin resolution:
+
+```kotlin
+pluginManagement {
+    repositories {
+        mavenLocal()
+        gradlePluginPortal()
+    }
+}
+
+dependencyResolutionManagement {
+    repositories {
+        mavenLocal()
+        mavenCentral()
+    }
+}
+
+rootProject.name = "my-mod"
+```
 
 `build.gradle.kts`:
 
 ```kotlin
 plugins {
-    kotlin("jvm") version "2.5.0"
+    kotlin("jvm") version "2.5.0-Beta1"
     id("org.ohmyloader.gradle") version "0.1.0-SNAPSHOT"
 }
 
-repositories {
-    mavenLocal()
-    mavenCentral()
+kotlin {
+    jvmToolchain(27)
 }
 
 oml {
     minecraftVersion.set("26.3")
 }
 ```
+
+The Kotlin version has to be one that can target Java 27 class files; `2.5.0-Beta1` is what the
+loader itself is built with.
 
 The `oml-gradle` plugin does everything else: it puts `oml-api` on `compileOnly`, resolves the runtime
 layer (including the per-version adapter) by version, provides `runClient` / `runServer`, and
@@ -50,7 +78,7 @@ class MyMod : OMLModInitializer {
 
         Events.CHAT_RECEIVED.register { event ->
             if (event.message == "hello") {
-                event.canceled = true
+                event.cancel()
             }
         }
     }

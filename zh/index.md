@@ -25,7 +25,10 @@ features:
     details: 面向高层游戏语义编程：函数式事件注册、生命周期入口、内容声明 DSL。不接触版本内部结构，原生对象随时可通过 platform 逃生舱访问。
   - icon: 📝
     title: 声明式内容
-    details: 几行 Kotlin 或一个 TOML 文件即可声明方块、物品与配方，在注册表冻结点材料化为原生内容，走 vanilla 自己的校验与数据包路径。
+    details: 几行 Kotlin 或一个 TOML 内容包（`.oml` 归档）即可声明方块、物品与配方，在注册表冻结点材料化为原生内容，走 vanilla 自己的校验与数据包路径。
+  - icon: 🖥️
+    title: 双端支持
+    details: 客户端与专用服务端各有独立的钩子与初始化路径，用一个 oml.side 开关选边。同一份 mod 源码不改动即可双端运行。
   - icon: 🚀
     title: Java 27
     details: 全线运行在最新 Java 运行时上，享受现代 JIT 与 GC。

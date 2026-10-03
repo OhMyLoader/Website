@@ -106,7 +106,7 @@ export default defineConfig({
       },
     },
     editLink: {
-      pattern: 'https://github.com/OhMyLoader/Website/edit/main/:path',
+      pattern: 'https://github.com/OhMyLoader/ohmyloader.github.io/edit/main/:path',
     },
   },
 })

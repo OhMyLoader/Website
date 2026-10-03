@@ -114,7 +114,8 @@ registry.declareBlockDrop(block = "ruby_ore", drop = "my_mod:ruby", dropCountMin
 
 ## 数据轨：TOML 内容包
 
-不需要写代码的内容：在 `mods/` 目录放一个 `.toml` 文件（文件名即命名空间），声明方块与物品：
+不需要写代码的内容：声明写在 **`.oml` 归档**根目录的 `content.toml`（普通 zip 改名，目录结构见下方
+"分发形态"）。归档名即命名空间，包内可声明方块、物品与配方：
 
 ```toml
 [block.ruby_ore]
@@ -125,7 +126,9 @@ requires_correct_tool = true
 [item.ruby]
 max_damage = 64
 attack_damage = 2.0
-mines_and_drops = "minecraft:stone"
+# 工具规则是内联表数组，每个方块一项。
+mines_and_drops = [{ block = "minecraft:stone", speed = 8.0 }]
+override_speed = [{ block = "minecraft:dirt", speed = 4.0 }]
 
 [crafting.ruby_block]
 type = "shaped"
@@ -138,12 +141,17 @@ count = 2
 ingredients = ["ruby_ore", "minecraft:stick"]
 ```
 
-字段与代码 API 一一对应（`destroy_time` → `destroyTime` …）。`[crafting.<产出物 id>]` 段声明一个合成配方：`type` 选择
+字段与代码 API 一一对应（`destroy_time` → `destroyTime` …）；`mines_and_drops` 与 `override_speed`
+的条目带 `block` 与 `speed`，`denies_drops` 的条目只带 `block`。`[crafting.<产出物 id>]` 段声明一个合成配方：`type` 选择
 shaped / shapeless；shaped 需要 `pattern`（行）与 `key` 内联表（图案字符 → 物品 id）；shapeless 需要
 `ingredients` 列表；`count` 可选（默认 1）。格式错误（图案不齐、未知类型、缺字段）会让内容包加载失败
 并说明原因。TOML 包与代码 mod 共享同一条
 收集 → 冻结材料化管线，资产注入也把 TOML 包的命名空间当作 mod 域对待。字段拼错会在启动日志里
 被逐条点名——不存在静默忽略。
+
+散装 `.toml` 文件丢进 `mods/` **不是**受支持的包形态：它无法携带自己的贴图，方块会渲染成缺失材质，
+因此 loader 会明确报错并拒绝加载。请打成 `.oml` 归档。
+
 ## 分发形态：`.oml` 归档
 
 内容包以 **`.oml` 归档**分发（普通 zip 改名）：根目录放 `content.toml`，随包携带自己的 `assets/`

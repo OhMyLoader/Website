@@ -100,4 +100,5 @@ rules — same pipeline, same startup checks. Unsupported Mixin features (`Shift
 Every rule is re-verified before control is handed to the game's main thread: handler existence,
 staticness, signature consistency and match counts. The default mode `fail` prints each problem and
 aborts; `-Doml.injection.verify=warn` only warns; `off` disables. For timing and scale statistics,
-see `-Doml.diagnostics=inject`.
+add `-Doml.diagnostics=1` — that switch is boolean (any non-blank value other than `false` turns it
+on; the value carries no meaning).

@@ -2,7 +2,7 @@
 
 ## Mod entry
 
-`@Mod` marks the mod's entry class, which implements the `OMLModInitializer` interface. After the
+`@Mod` marks the mod's entry class, which implements the [`OMLModInitializer`](https://github.com/OhMyLoader/OhMyLoader) interface. After the
 game finishes initializing, the loader instantiates the class and calls `onInitialize` with the
 mod's own metadata:
 
@@ -21,7 +21,8 @@ assets and content ids).
 ## Event registration
 
 Events are registered as reflection-free lambdas on the `Events` object. The handler signature is
-the event type; cancellable events are canceled by setting `canceled = true`:
+the event type; cancellable events are canceled by calling `cancel()` (`canceled` is a read-only
+projection of it — reading it lets a later handler observe an earlier one's decision):
 
 ```kotlin
 Events.CLIENT_TICK.register { /* every logical tick */ }
@@ -52,7 +53,7 @@ Filtering chat:
 ```kotlin
 Events.CHAT_RECEIVED.register { event ->
     if (event.message.contains("bad_word")) {
-        event.canceled = true
+        event.cancel()
     }
 }
 ```

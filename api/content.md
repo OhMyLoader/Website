@@ -121,8 +121,9 @@ the **vanilla datapack reload path**, server-authoritative and synced to clients
 
 ## The data track: TOML content packs
 
-Content without code: drop a `.toml` file into the `mods/` directory (the file name becomes the
-namespace) and declare blocks and items:
+Content without code: a pack's declarations live in `content.toml` at the root of an **`.oml` archive**
+(a plain zip renamed — see the distribution section below for the layout). The archive name is the
+namespace, and the pack declares blocks, items and recipes:
 
 ```toml
 [block.ruby_ore]
@@ -133,7 +134,9 @@ requires_correct_tool = true
 [item.ruby]
 max_damage = 64
 attack_damage = 2.0
-mines_and_drops = "minecraft:stone"
+# Tool rules are arrays of inline tables, one entry per block.
+mines_and_drops = [{ block = "minecraft:stone", speed = 8.0 }]
+override_speed = [{ block = "minecraft:dirt", speed = 4.0 }]
 
 [crafting.ruby_block]
 type = "shaped"
@@ -146,8 +149,9 @@ count = 2
 ingredients = ["ruby_ore", "minecraft:stick"]
 ```
 
-The fields map one-to-one onto the code API (`destroy_time` → `destroyTime`, …). A
-`[crafting.<result-id>]` section declares a crafting recipe whose result is that item: `type`
+The fields map one-to-one onto the code API (`destroy_time` → `destroyTime`, …); `mines_and_drops`
+and `override_speed` entries carry `block` and `speed`, `denies_drops` entries carry `block` alone.
+A `[crafting.<result-id>]` section declares a crafting recipe whose result is that item: `type`
 selects shaped / shapeless; shaped needs `pattern` (rows) plus a `key` inline table mapping
 pattern characters to item ids; shapeless needs an `ingredients` list; `count` is optional
 (default 1). Validation errors (ragged patterns, unknown types, missing fields) fail the pack
@@ -155,6 +159,11 @@ with the reason. TOML packs share
 the same collect → freeze-materialize pipeline as code mods, and asset injection treats the pack's
 namespace like a mod domain. A misspelled field is called out by name in the startup log — nothing
 is silently ignored.
+
+A loose `.toml` file dropped into `mods/` is **not** a pack form and is refused with an explicit
+message: it cannot carry the pack's own textures, so its blocks would render with missing textures.
+Ship the pack as an `.oml` archive.
+
 ## Distribution form: `.oml` archives
 
 A content pack ships as a **`.oml` archive** (a plain zip renamed): `content.toml` at the root,

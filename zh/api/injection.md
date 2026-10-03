@@ -92,5 +92,6 @@ classTarget("net/minecraft/client/Minecraft") {
 ## 自检
 
 所有规则在控制权交给游戏主线程之前重新验证：处理器存在性、静态性、签名一致性、命中数。默认模式
-`fail` 逐条打印问题并中止启动；`-Doml.injection.verify=warn` 只告警；`off` 关闭。诊断细节见
-`-Doml.diagnostics=inject`（改写耗时与规模统计）。
+`fail` 逐条打印问题并中止启动；`-Doml.injection.verify=warn` 只告警；`off` 关闭。要拿到改写耗时与
+规模统计，加上 `-Doml.diagnostics=1`——这个开关是布尔的（任何非空且非 `false` 的值即启用，取值本身
+没有含义）。

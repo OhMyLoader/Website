@@ -18,8 +18,8 @@ class MyMod : OMLModInitializer {
 
 ## 事件注册
 
-事件通过 `Events` 对象的函数式 lambda 注册，零反射、可追溯。处理器签名即事件类型，取消类事件直接置
-`canceled = true`：
+事件通过 `Events` 对象的函数式 lambda 注册，零反射、可追溯。处理器签名即事件类型，取消类事件调用
+`cancel()`（`canceled` 是只读投影——后注册的处理器可以据此看到先前处理器的决定）：
 
 ```kotlin
 Events.CLIENT_TICK.register { /* 每逻辑帧 */ }
@@ -50,7 +50,7 @@ Events.FRAME_RATE_LIMIT.register { event ->
 ```kotlin
 Events.CHAT_RECEIVED.register { event ->
     if (event.message.contains("bad_word")) {
-        event.canceled = true
+        event.cancel()
     }
 }
 ```
