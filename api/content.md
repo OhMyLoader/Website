@@ -48,6 +48,79 @@ Every block automatically registers its block item. The returned `OMLBlock` expo
 (the native block object) once content registration completes — the escape hatch for
 version-specific behavior.
 
+### Behavior hooks
+
+Blocks can carry declarative behavior hooks; their implementation is the version adapter's (it
+materializes its own `Block` subclass), and your handlers are plain lambdas. The vanilla behavior
+always still runs — a behavior block is a plain block plus hooks.
+
+```kotlin
+registry.declareBlock("trap_floor") {
+    onStepOn { event ->
+        if (!event.isClient) {
+            // server side: apply damage, effects — via event.level / event.entity if needed
+        }
+    }
+    onHit { event ->
+        // a player just started breaking the block
+    }
+}
+```
+
+| Hook       | Fires                                                  | Event                                       |
+|------------|--------------------------------------------------------|---------------------------------------------|
+| `onStepOn` | every tick an entity stands on the block, both sides   | `OMLStepOnEvent` — x/y/z, `isClient`, `level`, `entity` |
+| `onHit`    | a player starts breaking the block                     | `OMLBlockHitEvent` — x/y/z, `isClient`, `level`, `player` |
+
+`level` and `entity`/`player` are the raw version objects — the same escape hatch as `platform`.
+Gate gameplay effects on `isClient`: the hook fires on both sides.
+
+### Block entities: machines
+
+`blockEntity` gives the block a server-side tick and a **persistent data store** — the pieces a
+machine is made of:
+
+```kotlin
+registry.declareBlock("press") {
+    blockEntity {
+        tick { event ->
+            val progress = event.data.getInt("progress") + 1
+            event.data.putInt("progress", progress)   // survives save/reload
+        }
+    }
+}
+```
+
+- `tick` runs once per game tick while the chunk is loaded, **server side only** (the client never
+  sees the event — a machine tick is a simulation concept).
+- `event.data` is an `OMLBlockData`: primitive-typed key-value pairs (`int` / `long` / `float` /
+  `double` / `boolean` / `string`) that persist with the world; writes mark the block entity for
+  the next autosave.
+- A block may combine behavior hooks and a block entity freely.
+
+### World generation: ores
+
+`generateAsOre` makes the block generate naturally as a vein. It materializes into datapack
+worldgen files merged into the target biomes — like any datapack ore, **only newly generated
+chunks** are affected:
+
+```kotlin
+registry.declareBlock("ruby_ore") {
+    destroyTime = 3.0f
+    requiresCorrectToolForDrops = true
+    generateAsOre {
+        veinSize = 8        // blocks per vein
+        perChunk = 6        // placement attempts per chunk
+        minY = 16
+        maxY = 64           // trapezoid height distribution
+        biomes += listOf("minecraft:forest", "minecraft:taiga")  // empty = every biome
+    }
+}
+```
+
+The vein replaces the stone family (`minecraft:stone_ore_replaceables`); an empty `biomes` list is
+safe outside the overworld for the same reason — netherrack and end stone do not match.
+
 ## Items
 
 ```kotlin
@@ -147,6 +220,17 @@ key = { R = "ruby" }
 type = "shapeless"
 count = 2
 ingredients = ["ruby_ore", "minecraft:stick"]
+
+[smelting.ruby]
+input = "raw_ruby"
+experience = 0.7
+cooking_time = 100
+# furnace = "blasting"   # smelting (default) / blasting / smoking
+
+[loot.ruby_ore]
+drop = "raw_ruby"
+drop_count_min = 1
+drop_count_max = 3
 ```
 
 The fields map one-to-one onto the code API (`destroy_time` → `destroyTime`, …); `mines_and_drops`
@@ -154,11 +238,16 @@ and `override_speed` entries carry `block` and `speed`, `denies_drops` entries c
 A `[crafting.<result-id>]` section declares a crafting recipe whose result is that item: `type`
 selects shaped / shapeless; shaped needs `pattern` (rows) plus a `key` inline table mapping
 pattern characters to item ids; shapeless needs an `ingredients` list; `count` is optional
-(default 1). Validation errors (ragged patterns, unknown types, missing fields) fail the pack
+(default 1). A `[smelting.<result-id>]` section declares a furnace recipe (`input` required,
+`furnace` selecting smelting / blasting / smoking, optional `experience` and `cooking_time`); a
+`[loot.<block-id>]` section declares that breaking the block drops `drop` instead of itself. The
+`ore` inline table on a block mirrors `generateAsOre` (`vein_size`, `per_chunk`, `min_y`, `max_y`,
+`biomes`). Validation errors (ragged patterns, unknown types, missing fields) fail the pack
 with the reason. TOML packs share
 the same collect → freeze-materialize pipeline as code mods, and asset injection treats the pack's
 namespace like a mod domain. A misspelled field is called out by name in the startup log — nothing
-is silently ignored.
+is silently ignored. What the data track does **not** cover: behavior hooks and block entities are
+mod code and have no TOML form.
 
 A loose `.toml` file dropped into `mods/` is **not** a pack form and is refused with an explicit
 message: it cannot carry the pack's own textures, so its blocks would render with missing textures.
@@ -187,7 +276,8 @@ Recipes declared through the content tracks ride vanilla's datapack reload:
 
 - **Textures / lang / models**: `F3+T` re-scans the mod jars and `.oml` archives — edited files are
   picked up on the spot.
-- **Crafting recipes**: edit the recipe in the pack, then run `/reload` (or `F3+T`) — the loader
-  re-reads the packs from disk and the datapack JSON is served fresh.
+- **Crafting / smelting recipes and loot**: edit the pack, then run `/reload` (or `F3+T`) — the
+  loader re-reads the packs from disk and the datapack JSON is served fresh. Ore worldgen files
+  reload the same way, but world generation itself only touches newly generated chunks.
 - **Blocks / items themselves**: not reloadable. The registries freeze early in startup; adding or
   changing a block or item requires a restart. This is a vanilla constraint, not an OML limitation.

@@ -43,6 +43,75 @@ val block = registry.declareBlock("ruby_ore") {
 每个方块自动注册对应的方块物品。返回的 `OMLBlock` 在内容注册完成后可访问 `platform`（原生方块对象）——
 需要版本特定行为时的逃生舱。
 
+### 行为钩子
+
+方块可以携带声明式行为钩子：**行为实现由版本 adapter 提供**（它材料化自己的 `Block` 子类），mod 这边
+只写普通 lambda。原版行为始终照常执行——行为方块就是"普通方块 + 钩子"。
+
+```kotlin
+registry.declareBlock("trap_floor") {
+    onStepOn { event ->
+        if (!event.isClient) {
+            // 服务端：施加伤害、效果——需要时经 event.level / event.entity 逃生舱
+        }
+    }
+    onHit { event ->
+        // 玩家刚开始挖掘这个方块
+    }
+}
+```
+
+| 钩子       | 触发时机                                  | 事件                                          |
+|------------|-------------------------------------------|-----------------------------------------------|
+| `onStepOn` | 有实体站在方块上的每个 tick，双端都会触发 | `OMLStepOnEvent` —— x/y/z、`isClient`、`level`、`entity` |
+| `onHit`    | 玩家开始破坏方块                          | `OMLBlockHitEvent` —— x/y/z、`isClient`、`level`、`player` |
+
+`level` 与 `entity`/`player` 是原生版本对象——与 `platform` 同一条逃生舱。玩法效果请以 `isClient`
+为闸门：钩子双端都会触发。
+
+### 方块实体：机器
+
+`blockEntity` 给方块一个服务端 tick 和一个**持久化数据存储**——机器就是这两块拼出来的：
+
+```kotlin
+registry.declareBlock("press") {
+    blockEntity {
+        tick { event ->
+            val progress = event.data.getInt("progress") + 1
+            event.data.putInt("progress", progress)   // 随存档持久化
+        }
+    }
+}
+```
+
+- `tick` 在区块加载期间每个游戏 tick 运行一次，**仅服务端**（客户端收不到该事件——机器 tick 是
+  模拟概念）。
+- `event.data` 是 `OMLBlockData`：基础类型键值对（`int` / `long` / `float` / `double` / `boolean` /
+  `string`），随世界持久化；写入会标记方块实体等待下次自动保存。
+- 行为钩子与方块实体可以自由组合在同一个方块上。
+
+### 世界生成：矿石
+
+`generateAsOre` 让方块作为矿脉自然生成。它材料化为数据包 worldgen 文件并合并进目标生物群系——
+与任何数据包矿石一样，**只影响新生成的区块**：
+
+```kotlin
+registry.declareBlock("ruby_ore") {
+    destroyTime = 3.0f
+    requiresCorrectToolForDrops = true
+    generateAsOre {
+        veinSize = 8        // 每条矿脉的方块数
+        perChunk = 6        // 每区块的尝试次数
+        minY = 16
+        maxY = 64           // 梯形高度分布
+        biomes += listOf("minecraft:forest", "minecraft:taiga")  // 留空 = 所有生物群系
+    }
+}
+```
+
+矿脉替换石器家族（`minecraft:stone_ore_replaceables`）；`biomes` 留空在下界/末地同样安全——
+下界岩与末地石不匹配替换标签。
+
 ## 物品
 
 ```kotlin
@@ -139,15 +208,29 @@ key = { R = "ruby" }
 type = "shapeless"
 count = 2
 ingredients = ["ruby_ore", "minecraft:stick"]
+
+[smelting.ruby]
+input = "raw_ruby"
+experience = 0.7
+cooking_time = 100
+# furnace = "blasting"   # smelting（默认）/ blasting / smoking
+
+[loot.ruby_ore]
+drop = "raw_ruby"
+drop_count_min = 1
+drop_count_max = 3
 ```
 
 字段与代码 API 一一对应（`destroy_time` → `destroyTime` …）；`mines_and_drops` 与 `override_speed`
 的条目带 `block` 与 `speed`，`denies_drops` 的条目只带 `block`。`[crafting.<产出物 id>]` 段声明一个合成配方：`type` 选择
 shaped / shapeless；shaped 需要 `pattern`（行）与 `key` 内联表（图案字符 → 物品 id）；shapeless 需要
-`ingredients` 列表；`count` 可选（默认 1）。格式错误（图案不齐、未知类型、缺字段）会让内容包加载失败
+`ingredients` 列表；`count` 可选（默认 1）。`[smelting.<产出物 id>]` 段声明熔炼配方（`input` 必填，
+`furnace` 选择 smelting / blasting / smoking，`experience` 与 `cooking_time` 可选）；`[loot.<方块 id>]`
+段声明破坏该方块改为掉落 `drop`。方块段里的 `ore` 内联表对应 `generateAsOre`（`vein_size`、
+`per_chunk`、`min_y`、`max_y`、`biomes`）。格式错误（图案不齐、未知类型、缺字段）会让内容包加载失败
 并说明原因。TOML 包与代码 mod 共享同一条
 收集 → 冻结材料化管线，资产注入也把 TOML 包的命名空间当作 mod 域对待。字段拼错会在启动日志里
-被逐条点名——不存在静默忽略。
+被逐条点名——不存在静默忽略。数据轨**不**覆盖：行为钩子与方块实体是 mod 代码，没有 TOML 形态。
 
 散装 `.toml` 文件丢进 `mods/` **不是**受支持的包形态：它无法携带自己的贴图，方块会渲染成缺失材质，
 因此 loader 会明确报错并拒绝加载。请打成 `.oml` 归档。
@@ -173,7 +256,7 @@ MyPack.oml (zip)
 内容轨的配方跟随 vanilla 的数据包重载：
 
 - **贴图 / lang / 模型**：`F3+T` 会重新扫描 mod jar 与 `.oml` 归档，改动的文件当场生效。
-- **合成配方**：修改包内的配方后执行 `/reload`（或 `F3+T`），loader 从磁盘重新读取内容包，
-  数据包 JSON 以最新内容应答。
+- **合成 / 熔炼配方与掉落表**：修改包内声明后执行 `/reload`（或 `F3+T`），loader 从磁盘重新读取内容包，
+  数据包 JSON 以最新内容应答。矿石 worldgen 文件同样随重载刷新，但世界生成本身只作用于新生成的区块。
 - **方块 / 物品本体**：不可热重载。注册表在启动早期冻结，新增或修改方块 / 物品需要重启——
   这是 vanilla 的约束，不是 OML 的限制。
