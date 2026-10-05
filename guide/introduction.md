@@ -44,11 +44,11 @@ native types. The current stable line is **26.3**; the latest snapshot is tracke
 
 ## Repositories
 
-| Repository                                                             | Contents                                                                              |
-|------------------------------------------------------------------------|---------------------------------------------------------------------------------------|
-| [OhMyLoader](https://github.com/OhMyLoader/OhMyLoader)                 | The loader: core, API, version adapters, installer, native library                    |
-| [OhMyLoaderGradle](https://github.com/OhMyLoader/OhMyLoaderGradle)     | The official Gradle plugin: runtime assembly and `runClient` / `runServer`            |
-| [OhMyLoaderTestMod](https://github.com/OhMyLoader/OhMyLoaderTestMod)   | The end-to-end verification mod, consuming OML exactly like an external mod project   |
+| Repository                                                           | Contents                                                                            |
+|----------------------------------------------------------------------|-------------------------------------------------------------------------------------|
+| [OhMyLoader](https://github.com/OhMyLoader/OhMyLoader)               | The loader: core, API, version adapters, installer, native library                  |
+| [OhMyLoaderGradle](https://github.com/OhMyLoader/OhMyLoaderGradle)   | The official Gradle plugin: runtime assembly and `runClient` / `runServer`          |
+| [OhMyLoaderTestMod](https://github.com/OhMyLoader/OhMyLoaderTestMod) | The end-to-end verification mod, consuming OML exactly like an external mod project |
 
 The three repositories consume each other by Maven coordinate only. See the loader repository's
 README for the module layout.

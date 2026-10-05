@@ -17,7 +17,7 @@ git clone https://github.com/OhMyLoader/OhMyLoaderGradle.git
 
 ## 建立工程
 
-`settings.gradle.kts` —— 插件必须在工程存在**之前**就能从 `mavenLocal` 解析，而工程级的
+`settings.gradle.kts` —— 插件必须在工程存在 **之前**就能从 `mavenLocal` 解析，而工程级的
 `repositories { }` 管不到插件解析：
 
 ```kotlin

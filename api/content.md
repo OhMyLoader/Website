@@ -38,11 +38,11 @@ val block = registry.declareBlock("ruby_ore") {
 }
 ```
 
-| Property                        | Default                 | Meaning                            |
-|---------------------------------|-------------------------|------------------------------------|
-| `destroyTime`                   | vanilla default         | hardness (time to break)           |
-| `explosionResistance`           | follows `destroyTime`   | blast resistance                   |
-| `requiresCorrectToolForDrops`   | `false`                 | drops only with the correct tool   |
+| Property                      | Default               | Meaning                          |
+|-------------------------------|-----------------------|----------------------------------|
+| `destroyTime`                 | vanilla default       | hardness (time to break)         |
+| `explosionResistance`         | follows `destroyTime` | blast resistance                 |
+| `requiresCorrectToolForDrops` | `false`               | drops only with the correct tool |
 
 Every block automatically registers its block item. The returned `OMLBlock` exposes `platform`
 (the native block object) once content registration completes — the escape hatch for
@@ -67,10 +67,10 @@ registry.declareBlock("trap_floor") {
 }
 ```
 
-| Hook       | Fires                                                  | Event                                       |
-|------------|--------------------------------------------------------|---------------------------------------------|
-| `onStepOn` | every tick an entity stands on the block, both sides   | `OMLStepOnEvent` — x/y/z, `isClient`, `level`, `entity` |
-| `onHit`    | a player starts breaking the block                     | `OMLBlockHitEvent` — x/y/z, `isClient`, `level`, `player` |
+| Hook       | Fires                                                | Event                                                     |
+|------------|------------------------------------------------------|-----------------------------------------------------------|
+| `onStepOn` | every tick an entity stands on the block, both sides | `OMLStepOnEvent` — x/y/z, `isClient`, `level`, `entity`   |
+| `onHit`    | a player starts breaking the block                   | `OMLBlockHitEvent` — x/y/z, `isClient`, `level`, `player` |
 
 `level` and `entity`/`player` are the raw version objects — the same escape hatch as `platform`.
 Gate gameplay effects on `isClient`: the hook fires on both sides.
@@ -136,14 +136,14 @@ registry.declareItem("ruby_sword") {
 }
 ```
 
-| Property                       | Default              | Meaning                                                           |
-|--------------------------------|----------------------|-------------------------------------------------------------------|
-| `maxDamage`                    | none (unbreakable)   | max durability; > 0 shows the durability bar                      |
-| `attackDamage`                 | none                 | main-hand attack damage **modifier** (vanilla fists: 1.0)         |
-| `attackSpeed`                  | none                 | main-hand attack speed **modifier** (vanilla base: 4.0)           |
-| `miningSpeed`                  | –                    | default mining speed when no rule matches (requires tool rules)   |
-| `toolDamagePerBlock`           | `1`                  | durability cost per broken block                                  |
-| `canDestroyBlocksInCreative`   | `true`               | instant breaking in creative mode                                 |
+| Property                     | Default            | Meaning                                                         |
+|------------------------------|--------------------|-----------------------------------------------------------------|
+| `maxDamage`                  | none (unbreakable) | max durability; > 0 shows the durability bar                    |
+| `attackDamage`               | none               | main-hand attack damage **modifier** (vanilla fists: 1.0)       |
+| `attackSpeed`                | none               | main-hand attack speed **modifier** (vanilla base: 4.0)         |
+| `miningSpeed`                | –                  | default mining speed when no rule matches (requires tool rules) |
+| `toolDamagePerBlock`         | `1`                | durability cost per broken block                                |
+| `canDestroyBlocksInCreative` | `true`             | instant breaking in creative mode                               |
 
 Tool rule semantics: `minesAndDrops` = matched blocks mine at the given speed **and drop loot**;
 `overrideSpeed` = speed only, vanilla drops; `deniesDrops` = vanilla speed, never drops. These map
@@ -237,8 +237,8 @@ The fields map one-to-one onto the code API (`destroy_time` → `destroyTime`, �
 and `override_speed` entries carry `block` and `speed`, `denies_drops` entries carry `block` alone.
 A `[crafting.<result-id>]` section declares a crafting recipe whose result is that item: `type`
 selects shaped / shapeless; shaped needs `pattern` (rows) plus a `key` inline table mapping
-pattern characters to item ids; shapeless needs an `ingredients` list; `count` is optional
-(default 1). A `[smelting.<result-id>]` section declares a furnace recipe (`input` required,
+pattern characters to item ids; shapeless needs an `ingredients` list; `count` is optional (default 1). A
+`[smelting.<result-id>]` section declares a furnace recipe (`input` required,
 `furnace` selecting smelting / blasting / smoking, optional `experience` and `cooking_time`); a
 `[loot.<block-id>]` section declares that breaking the block drops `drop` instead of itself. The
 `ore` inline table on a block mirrors `generateAsOre` (`vein_size`, `per_chunk`, `min_y`, `max_y`,

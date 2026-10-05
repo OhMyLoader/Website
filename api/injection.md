@@ -29,18 +29,18 @@ object MyRules : RuleSetProvider {
 
 ## Anchors
 
-| Anchor                               | Semantics                                                                  | Mixin equivalent             |
-|--------------------------------------|----------------------------------------------------------------------------|------------------------------|
-| `atHead`                             | method head                                                                | `HEAD`                       |
-| `atConstructorHead`                  | after `super()` in a constructor (from here, `this` is usable)             | –                            |
-| `atReturn(ordinal)`                  | before every return; `atReturn()` = all                                    | `RETURN`                     |
-| `atTail`                             | before the last return                                                     | `TAIL`                       |
-| `beforeCall` / `afterCall`           | before / after a method call                                               | `INVOKE` / `INVOKE_ASSIGN`   |
-| `beforeField` / `afterField`         | before / after a field access                                              | –                            |
-| `beforeNew`                          | before a `new` instruction                                                 | –                            |
-| `beforeConstant` / `afterConstant`   | before / after a constant load                                             | `CONSTANT`                   |
-| `afterStore` / `beforeLoad`          | after a local-variable store / before a load                               | `Store` / `Load`             |
-| `within(from, to)`                   | restricts the search window between two anchors (nestable, intersection)   | `@Slice`                     |
+| Anchor                             | Semantics                                                                | Mixin equivalent           |
+|------------------------------------|--------------------------------------------------------------------------|----------------------------|
+| `atHead`                           | method head                                                              | `HEAD`                     |
+| `atConstructorHead`                | after `super()` in a constructor (from here, `this` is usable)           | –                          |
+| `atReturn(ordinal)`                | before every return; `atReturn()` = all                                  | `RETURN`                   |
+| `atTail`                           | before the last return                                                   | `TAIL`                     |
+| `beforeCall` / `afterCall`         | before / after a method call                                             | `INVOKE` / `INVOKE_ASSIGN` |
+| `beforeField` / `afterField`       | before / after a field access                                            | –                          |
+| `beforeNew`                        | before a `new` instruction                                               | –                          |
+| `beforeConstant` / `afterConstant` | before / after a constant load                                           | `CONSTANT`                 |
+| `afterStore` / `beforeLoad`        | after a local-variable store / before a load                             | `Store` / `Load`           |
+| `within(from, to)`                 | restricts the search window between two anchors (nestable, intersection) | `@Slice`                   |
 
 Anchors accept owner / desc / ordinal filters (`atReturn(0)` hits only the first return).
 
@@ -48,23 +48,23 @@ Anchors accept owner / desc / ordinal filters (`atReturn(0)` hits only the first
 
 Each anchor block declares what to inject:
 
-| Payload                                | Semantics                                                                   | Mixin equivalent               |
-|----------------------------------------|-----------------------------------------------------------------------------|--------------------------------|
-| `call(owner, method, desc)`            | calls a static method at the anchor (locals can be injected as arguments)   | `@Inject`                      |
-| `redirectCall(...)`                    | redirects one method call                                                   | `@Redirect`                    |
-| `modifyArg(...)` / `modifyArgs(...)`   | rewrites call arguments                                                     | `@ModifyArg` / `@ModifyArgs`   |
-| `modifyConstant(...)`                  | rewrites a constant                                                         | `@ModifyConstant`              |
-| `modifyExpressionValue(...)`           | rewrites an expression's value                                              | `@ModifyExpressionValue`       |
-| `modifyVariable(...)`                  | rewrites a local variable                                                   | `@ModifyVariable`              |
+| Payload                              | Semantics                                                                 | Mixin equivalent             |
+|--------------------------------------|---------------------------------------------------------------------------|------------------------------|
+| `call(owner, method, desc)`          | calls a static method at the anchor (locals can be injected as arguments) | `@Inject`                    |
+| `redirectCall(...)`                  | redirects one method call                                                 | `@Redirect`                  |
+| `modifyArg(...)` / `modifyArgs(...)` | rewrites call arguments                                                   | `@ModifyArg` / `@ModifyArgs` |
+| `modifyConstant(...)`                | rewrites a constant                                                       | `@ModifyConstant`            |
+| `modifyExpressionValue(...)`         | rewrites an expression's value                                            | `@ModifyExpressionValue`     |
+| `modifyVariable(...)`                | rewrites a local variable                                                 | `@ModifyVariable`            |
 
 ## Match-count policies
 
-| Declaration    | Semantics                                                   |
-|----------------|-------------------------------------------------------------|
-| `require(n)`   | at least n hits, otherwise the launch fails (lower bound)   |
-| `allow(n)`     | at most n hits, more fails (guards over-broad rules)        |
-| `expect(n)`    | expects n hits; deviation only warns                        |
-| `optional()`   | zero hits allowed, suppressing the "no match" warning       |
+| Declaration  | Semantics                                                 |
+|--------------|-----------------------------------------------------------|
+| `require(n)` | at least n hits, otherwise the launch fails (lower bound) |
+| `allow(n)`   | at most n hits, more fails (guards over-broad rules)      |
+| `expect(n)`  | expects n hits; deviation only warns                      |
+| `optional()` | zero hits allowed, suppressing the "no match" warning     |
 
 ## Access rewriting and class merging
 

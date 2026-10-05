@@ -1,7 +1,7 @@
 # 内容注册
 
-内容注册分两条轨：**代码轨**（`ContentRegistry`，本页）与**数据轨**（TOML 内容包，见文末）。
-两者共用同一条管线：声明在启动期收集，在**注册表冻结点**一次性材料化为原生内容，之后与 vanilla
+内容注册分两条轨： **代码轨**（`ContentRegistry`，本页）与 **数据轨**（TOML 内容包，见文末）。
+两者共用同一条管线：声明在启动期收集，在 **注册表冻结点**一次性材料化为原生内容，之后与 vanilla
 内容不可区分。
 
 ::: warning 注册表冻结
@@ -45,7 +45,7 @@ val block = registry.declareBlock("ruby_ore") {
 
 ### 行为钩子
 
-方块可以携带声明式行为钩子：**行为实现由版本 adapter 提供**（它材料化自己的 `Block` 子类），mod 这边
+方块可以携带声明式行为钩子： **行为实现由版本 adapter 提供**（它材料化自己的 `Block` 子类），mod 这边
 只写普通 lambda。原版行为始终照常执行——行为方块就是"普通方块 + 钩子"。
 
 ```kotlin
@@ -61,9 +61,9 @@ registry.declareBlock("trap_floor") {
 }
 ```
 
-| 钩子       | 触发时机                                  | 事件                                          |
-|------------|-------------------------------------------|-----------------------------------------------|
-| `onStepOn` | 有实体站在方块上的每个 tick，双端都会触发 | `OMLStepOnEvent` —— x/y/z、`isClient`、`level`、`entity` |
+| 钩子       | 触发时机                                  | 事件                                                       |
+|------------|-------------------------------------------|------------------------------------------------------------|
+| `onStepOn` | 有实体站在方块上的每个 tick，双端都会触发 | `OMLStepOnEvent` —— x/y/z、`isClient`、`level`、`entity`   |
 | `onHit`    | 玩家开始破坏方块                          | `OMLBlockHitEvent` —— x/y/z、`isClient`、`level`、`player` |
 
 `level` 与 `entity`/`player` 是原生版本对象——与 `platform` 同一条逃生舱。玩法效果请以 `isClient`
@@ -71,7 +71,7 @@ registry.declareBlock("trap_floor") {
 
 ### 方块实体：机器
 
-`blockEntity` 给方块一个服务端 tick 和一个**持久化数据存储**——机器就是这两块拼出来的：
+`blockEntity` 给方块一个服务端 tick 和一个 **持久化数据存储**——机器就是这两块拼出来的：
 
 ```kotlin
 registry.declareBlock("press") {
@@ -84,7 +84,7 @@ registry.declareBlock("press") {
 }
 ```
 
-- `tick` 在区块加载期间每个游戏 tick 运行一次，**仅服务端**（客户端收不到该事件——机器 tick 是
+- `tick` 在区块加载期间每个游戏 tick 运行一次， **仅服务端**（客户端收不到该事件——机器 tick 是
   模拟概念）。
 - `event.data` 是 `OMLBlockData`：基础类型键值对（`int` / `long` / `float` / `double` / `boolean` /
   `string`），随世界持久化；写入会标记方块实体等待下次自动保存。
@@ -93,7 +93,7 @@ registry.declareBlock("press") {
 ### 世界生成：矿石
 
 `generateAsOre` 让方块作为矿脉自然生成。它材料化为数据包 worldgen 文件并合并进目标生物群系——
-与任何数据包矿石一样，**只影响新生成的区块**：
+与任何数据包矿石一样， **只影响新生成的区块**：
 
 ```kotlin
 registry.declareBlock("ruby_ore") {
@@ -230,7 +230,7 @@ shaped / shapeless；shaped 需要 `pattern`（行）与 `key` 内联表（图�
 `per_chunk`、`min_y`、`max_y`、`biomes`）。格式错误（图案不齐、未知类型、缺字段）会让内容包加载失败
 并说明原因。TOML 包与代码 mod 共享同一条
 收集 → 冻结材料化管线，资产注入也把 TOML 包的命名空间当作 mod 域对待。字段拼错会在启动日志里
-被逐条点名——不存在静默忽略。数据轨**不**覆盖：行为钩子与方块实体是 mod 代码，没有 TOML 形态。
+被逐条点名——不存在静默忽略。数据轨 **不**覆盖：行为钩子与方块实体是 mod 代码，没有 TOML 形态。
 
 散装 `.toml` 文件丢进 `mods/` **不是**受支持的包形态：它无法携带自己的贴图，方块会渲染成缺失材质，
 因此 loader 会明确报错并拒绝加载。请打成 `.oml` 归档。

@@ -2,7 +2,8 @@
 
 ## Mod entry
 
-`@Mod` marks the mod's entry class, which implements the [`OMLModInitializer`](https://github.com/OhMyLoader/OhMyLoader) interface. After the
+`@Mod` marks the mod's entry class, which implements the [`OMLModInitializer`](https://github.com/OhMyLoader/OhMyLoader)
+interface. After the
 game finishes initializing, the loader instantiates the class and calls `onInitialize` with the
 mod's own metadata:
 
@@ -28,15 +29,15 @@ projection of it — reading it lets a later handler observe an earlier one's de
 Events.CLIENT_TICK.register { /* every logical tick */ }
 ```
 
-| Event                | Fired                                          | Cancellable   | Fields                                                             |
-|----------------------|------------------------------------------------|---------------|--------------------------------------------------------------------|
-| `CLIENT_TICK`        | every client logical tick                      | –             | –                                                                  |
-| `SERVER_TICK`        | every server logical tick (dedicated server)   | –             | –                                                                  |
-| `FRAME_RATE_LIMIT`   | every frame's frame-rate calculation           | –             | `currentLimit: Int`, writable `limit: Int` (overrides the limit)   |
-| `GUI_OPEN`           | before any GUI is shown                        | ✅             | `screen: OMLScreen?` (null = the current GUI is being closed)      |
-| `CHAT_SENT`          | the player sends a chat message                | ✅             | `message: String`                                                  |
-| `CHAT_RECEIVED`      | a chat message is received (before display)    | ✅             | `message: String`                                                  |
-| `WORLD_LOAD`         | entering a world / disconnecting               | –             | `world: OMLWorld?` (null = disconnected)                           |
+| Event              | Fired                                        | Cancellable | Fields                                                           |
+|--------------------|----------------------------------------------|-------------|------------------------------------------------------------------|
+| `CLIENT_TICK`      | every client logical tick                    | –           | –                                                                |
+| `SERVER_TICK`      | every server logical tick (dedicated server) | –           | –                                                                |
+| `FRAME_RATE_LIMIT` | every frame's frame-rate calculation         | –           | `currentLimit: Int`, writable `limit: Int` (overrides the limit) |
+| `GUI_OPEN`         | before any GUI is shown                      | ✅          | `screen: OMLScreen?` (null = the current GUI is being closed)    |
+| `CHAT_SENT`        | the player sends a chat message              | ✅          | `message: String`                                                |
+| `CHAT_RECEIVED`    | a chat message is received (before display)  | ✅          | `message: String`                                                |
+| `WORLD_LOAD`       | entering a world / disconnecting             | –           | `world: OMLWorld?` (null = disconnected)                         |
 
 ### Examples
 
