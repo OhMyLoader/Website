@@ -41,3 +41,15 @@ mod 面向统一的高层游戏语义编程（事件、生命周期、内容注�
 | [OhMyLoaderTestMod](https://github.com/OhMyLoader/OhMyLoaderTestMod) | 端到端验证模组，以外部 mod 工程的身份走完整消费路径        |
 
 三个仓库互相只按 Maven 坐标消费。详细的模块划分见 loader 仓库 README。
+
+
+## API 稳定性
+
+面向 mod 的接口分三层，契约见 loader 仓库的
+[`oml-api/README.md`](https://github.com/OhMyLoader/OhMyLoader/blob/main/oml-api/README.md)：
+
+- **契约层**：`@Mod` 入口、`OMLModInitializer` / `ModContext`、`Events`、内容声明 DSL 与注入
+  DSL——按语义化版本向后兼容；破坏性变更先以弃用形式存在一个次版本。
+- **逃生舱之外的一切**：命令、配置、网络、按键 / HUD / 创造标签——已交付，1.0 前允许调整，
+  变更记录进发布说明。
+- **逃生舱**：一切 `platform` 属性交到你手里的原生对象——随游戏版本自由变动，设计如此。

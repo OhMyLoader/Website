@@ -52,3 +52,17 @@ native types. The current stable line is **26.3**; the latest snapshot is tracke
 
 The three repositories consume each other by Maven coordinate only. See the loader repository's
 README for the module layout.
+
+
+## API stability
+
+The mod-facing surface comes in three tiers, contracted in the loader's
+[`oml-api/README.md`](https://github.com/OhMyLoader/OhMyLoader/blob/main/oml-api/README.md):
+
+- **Contracted**: the `@Mod` entry, `OMLModInitializer` / `ModContext`, `Events`, the content
+  declaration DSL and the injection DSL — semantically backward-compatible; breaking changes are
+  deprecated for one minor release first.
+- **Provided, settling**: commands, config, network, key bindings / HUD / creative tabs — shipped,
+  allowed to adjust until 1.0, changes recorded in the release notes.
+- **Escape hatches**: everything a `platform` property hands you — the raw game objects, free to
+  change with any game version, by design.
