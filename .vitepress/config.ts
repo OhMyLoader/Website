@@ -33,6 +33,8 @@ export default defineConfig({
               items: [
                 { text: 'Mod Entry & Events', link: '/api/events' },
                 { text: 'Content Registration', link: '/api/content' },
+                { text: 'Slash Commands', link: '/api/command' },
+                { text: 'Mod Config', link: '/api/config' },
                 { text: 'Injection DSL & Mixin', link: '/api/injection' },
                 { text: 'Custom Network Payloads', link: '/api/network' },
                 { text: 'Client APIs', link: '/api/client' },
@@ -75,6 +77,8 @@ export default defineConfig({
               items: [
                 { text: 'mod 入口与事件系统', link: '/zh/api/events' },
                 { text: '内容注册', link: '/zh/api/content' },
+                { text: '斜杠命令', link: '/zh/api/command' },
+                { text: 'mod 配置', link: '/zh/api/config' },
                 { text: '注入 DSL 与 Mixin', link: '/zh/api/injection' },
                 { text: '自定义网络载荷', link: '/zh/api/network' },
                 { text: '客户端 API', link: '/zh/api/client' },
