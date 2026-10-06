@@ -9,7 +9,7 @@
 @Mod(id = "my_mod", name = "My Mod", version = "1.0.0")
 class MyMod : OMLModInitializer {
     override fun onInitialize(context: ModContext) {
-        // context: id / name / version
+        // context: id / name / version / config
     }
 }
 ```
@@ -34,6 +34,7 @@ Events.CLIENT_TICK.register { /* 每逻辑帧 */ }
 | `CHAT_SENT`        | 玩家发送聊天消息                | ✅     | `message: String`                                      |
 | `CHAT_RECEIVED`    | 收到聊天消息（显示前）          | ✅     | `message: String`                                      |
 | `WORLD_LOAD`       | 进入世界 / 断开连接             | –      | `world: OMLWorld?`（null = 断开）                      |
+| `HUD_RENDER`       | 世界已加载时每帧一次            | –      | `graphics: OMLGuiGraphics`                             |
 
 ### 示例
 
@@ -66,6 +67,6 @@ Events.WORLD_LOAD.register { event ->
 ```
 
 ::: tip
-专用服务端没有客户端事件源：`CLIENT_TICK` / `GUI_OPEN` / `FRAME_RATE_LIMIT` 等只会在客户端触发，
+专用服务端没有客户端事件源：`CLIENT_TICK` / `GUI_OPEN` / `FRAME_RATE_LIMIT` / `HUD_RENDER` 只会在客户端触发，
 `SERVER_TICK` 只在专用服务端触发。同一份 mod 源码双端运行时无需自行判边。
 :::

@@ -11,7 +11,7 @@ mod's own metadata:
 @Mod(id = "my_mod", name = "My Mod", version = "1.0.0")
 class MyMod : OMLModInitializer {
     override fun onInitialize(context: ModContext) {
-        // context: id / name / version
+        // context: id / name / version / config
     }
 }
 ```
@@ -38,6 +38,7 @@ Events.CLIENT_TICK.register { /* every logical tick */ }
 | `CHAT_SENT`        | the player sends a chat message              | ✅          | `message: String`                                                |
 | `CHAT_RECEIVED`    | a chat message is received (before display)  | ✅          | `message: String`                                                |
 | `WORLD_LOAD`       | entering a world / disconnecting             | –           | `world: OMLWorld?` (null = disconnected)                         |
+| `HUD_RENDER`       | once per frame while a world is loaded       | –           | `graphics: OMLGuiGraphics`                                       |
 
 ### Examples
 
@@ -70,7 +71,7 @@ Events.WORLD_LOAD.register { event ->
 ```
 
 ::: tip
-The dedicated server has no client event sources: `CLIENT_TICK`, `GUI_OPEN` and `FRAME_RATE_LIMIT`
-only fire on the client, while `SERVER_TICK` only fires on the dedicated server. A mod built for
-both sides needs no side checks of its own.
+The dedicated server has no client event sources: `CLIENT_TICK`, `GUI_OPEN`, `FRAME_RATE_LIMIT` and
+`HUD_RENDER` only fire on the client, while `SERVER_TICK` only fires on the dedicated server. A mod
+built for both sides needs no side checks of its own.
 :::

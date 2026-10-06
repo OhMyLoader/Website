@@ -33,7 +33,8 @@ counts. A wrong rule fails the launch, instead of silently doing one thing less 
 
 Each game version gets one thin adapter module (`oml-adapter-*`) that only maps hook anchors and
 native types. The current stable line is **26.3**; the latest snapshot is tracked separately by
-`oml-adapter-snapshot`, so most of the adaptation for the 26.4 official release is already done.
+`oml-adapter-snapshot`, which shares its whole implementation with the 26.3 adapter — landing the
+26.4 official release is one shape check away, not a rewrite.
 
 ### Two content tracks
 
