@@ -94,11 +94,11 @@ hosts (the dedicated one, or singleplayer's integrated server).
 
 Handlers receive an `OMLNetworkContext`:
 
-| Member       | Meaning                                                                   |
-|--------------|---------------------------------------------------------------------------|
-| `modId`      | the mod that declared the channel                                          |
-| `senderName` | the remote end's name — `null` when the connection carries no player       |
-| `platform`   | the raw version object behind the connection (the usual escape hatch)      |
+| Member       | Meaning                                                               |
+|--------------|-----------------------------------------------------------------------|
+| `modId`      | the mod that declared the channel                                     |
+| `senderName` | the remote end's name — `null` when the connection carries no player  |
+| `platform`   | the raw version object behind the connection (the usual escape hatch) |
 
 `senderName` is taken from the connection, never from the payload: a client decides what it sends,
 not who it is. A server handler that needs to trust an identity reads this field.
